@@ -37,7 +37,7 @@ public class AsciiMutatorTest {
 		System.out.println(monkey.text);
 		
 		for(Entry<String, Long> e : map.entrySet()) {
-			Assert.assertTrue("randomicer isn't realy random :"+e.getKey()+" = "+e.getValue(), e.getValue() < 1);
+			Assert.assertTrue("randomicer isn't realy random :"+e.getKey()+" = "+e.getValue(), e.getValue() <= 1);
 		}
 	}
 	
