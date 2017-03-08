@@ -12,14 +12,15 @@ import java.util.stream.Collectors;
 import org.maxbit89.geneticAlgorithm.sample.typeingMonkey.AsciiMutator;
 import org.maxbit89.util.random.RandomGenerator;
 
+/* TODO: make abstract class */
 public class Evolution {
 	private HashMap<Class<?>, Mutator> mutators = new HashMap<Class<?>, Mutator>();
-	
 	
 	public Evolution() {
 		mutators.put(AsciiMutator.class, new AsciiMutator());
 	}
 	
+	/* generate List/Pool where new generation inherits its genes from: */
 	public List<GeneticObject<?>> createGenePool(List<GeneticObject<?>> population) throws GeneticObjectException {
 		List<GeneticObject<?>> genePool = new ArrayList<GeneticObject<?>>();
 		
@@ -32,14 +33,31 @@ public class Evolution {
 		return genePool;
 	}
 	
-	public List<GeneticObject<?>> createPopulation(Class<? extends GeneticObject<?>> clazz, long populationSize, List<GeneticObject<?>> genePool, long mutationRatePercent) {
+	@SuppressWarnings("unchecked") //suppressed for ctor: ctor is checked by clazz argument.
+	public List<GeneticObject<?>> createPopulation(Class<? extends GeneticObject<?>> clazz, long populationSize, List<GeneticObject<?>> genePool, long mutationRatePercent) throws EvolutionException, MutatorException {
 		List<GeneticObject<?>> population = new ArrayList<GeneticObject<?>>();
 		long mutationRate = mutationRatePercent * populationSize/100;
-		try {
-			@SuppressWarnings("unchecked")
-			Constructor<GeneticObject<?>> ctor = (Constructor<GeneticObject<?>>) clazz.getConstructor();
+		
+			Constructor<GeneticObject<?>> ctor;
+			try {
+				ctor = (Constructor<GeneticObject<?>>) clazz.getConstructor();
+			} catch (NoSuchMethodException | SecurityException e) {
+				throw new EvolutionException("Couldn't find POJO constructor for:"+clazz.getName()+" Make shure Constructor is Public.", e);
+			}
 			for(long i=0; i<populationSize;i++) {
-				GeneticObject<?> genObj = ctor.newInstance();
+				GeneticObject<?> genObj = null;
+				try {
+					genObj = ctor.newInstance();
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					throw new EvolutionException("Couldn't create instance of:"+clazz.getName()+" maybe class inherits from inaccissable Class", e);
+				} catch (IllegalArgumentException e) {
+					throw new EvolutionException("Constructor isn't a POJO constructor (POJO constructors have no Arguments): "+clazz.getName(), e);
+				} catch (InvocationTargetException e) {
+					throw new EvolutionException("Couldn't create instance of:"+clazz.getName()+" class must not be abstract or interface", e);
+				}
 				List<Field> mutatableFields = Arrays.asList(genObj.getClass().getFields()).stream()
 				.filter(f -> f.isAnnotationPresent(Gene.class))
 				.collect(Collectors.toList());
@@ -58,28 +76,6 @@ public class Evolution {
 				
 				population.add(genObj);
 			}
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MutatorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		return population;
 	}

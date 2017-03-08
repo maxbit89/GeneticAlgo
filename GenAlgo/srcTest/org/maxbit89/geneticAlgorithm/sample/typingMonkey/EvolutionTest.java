@@ -10,14 +10,16 @@ import java.util.List;
 
 import org.junit.Test;
 import org.maxbit89.geneticAlgorithm.Evolution;
+import org.maxbit89.geneticAlgorithm.EvolutionException;
 import org.maxbit89.geneticAlgorithm.GeneticObject;
 import org.maxbit89.geneticAlgorithm.GeneticObjectException;
+import org.maxbit89.geneticAlgorithm.MutatorException;
 import org.maxbit89.geneticAlgorithm.sample.typeingMonkey.TypeingMonkey;
 import org.maxbit89.util.random.RandomGenerator;
 
 public class EvolutionTest {
 	@Test
-	public void tst() throws NoSuchMethodException, SecurityException, GeneticObjectException, IOException {
+	public void tst() throws NoSuchMethodException, SecurityException, GeneticObjectException, IOException, EvolutionException, MutatorException {
 		RandomGenerator.setSeed(10);
 		Evolution evo = new Evolution();
 		List<GeneticObject<?>> genePool = null;
